@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import TinderCard from 'react-tinder-card';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,18 +16,19 @@ import { PlacementCard } from './PlacementCard';
 import { FullRoadmapTimeline } from './FullRoadmapTimeline';
 import { AppLogo } from '../../components/AppLogo';
 
-type TinderCardAPI = { restoreCard: () => Promise<void> };
+/** Matches react-tinder-card's ref API so the ref type is assignable */
+type TinderCardRef = { swipe(dir?: string): Promise<void>; restoreCard(): Promise<void> };
 
 type Props = { roadmap: RoadmapData; slug: string; demo?: boolean };
 
-export function RoadmapView({ roadmap, slug, demo }: Props) {
+function RoadmapViewContent({ roadmap, slug, demo }: Props) {
   const searchParams = useSearchParams();
   const isCreator = searchParams.get('creator') === '1';
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showPlacement, setShowPlacement] = useState(false);
   const phases = getPhases(roadmap);
 
-  const tinderRef = useRef<TinderCardAPI | null>(null);
+  const tinderRef = useRef<TinderCardRef | null>(null);
   const cardShownAtRef = useRef(0);
 
   useEffect(() => {
@@ -103,7 +104,7 @@ export function RoadmapView({ roadmap, slug, demo }: Props) {
               transition={{ duration: 0.2 }}
             >
               <TinderCard
-                ref={tinderRef as React.Ref<TinderCardAPI>}
+                ref={tinderRef}
                 onCardLeftScreen={onCardLeftScreen}
                 preventSwipe={['up', 'down']}
                 className="pressable h-full w-full max-w-md"
@@ -159,5 +160,13 @@ export function RoadmapView({ roadmap, slug, demo }: Props) {
 
       <CtaBar slug={slug} completedSwipes={currentIndex} />
     </div>
+  );
+}
+
+export function RoadmapView(props: Props) {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-white">Loading...</div>}>
+      <RoadmapViewContent {...props} />
+    </Suspense>
   );
 }

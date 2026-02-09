@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { RoadmapView } from './RoadmapView';
 
@@ -29,7 +30,11 @@ export default async function RoadmapPage({ params }: Props) {
   }
 
   if (slug === 'demo') {
-    return <RoadmapView roadmap={DEMO_ROADMAP} slug="demo" demo />;
+    return (
+      <Suspense fallback={<div className="fixed inset-0 flex items-center justify-center bg-white">Loading…</div>}>
+        <RoadmapView roadmap={DEMO_ROADMAP} slug="demo" demo />
+      </Suspense>
+    );
   }
 
   try {
@@ -39,7 +44,11 @@ export default async function RoadmapPage({ params }: Props) {
     if (!res.ok) notFound();
     const roadmap = await res.json();
     if (!roadmap?.slug) notFound();
-    return <RoadmapView roadmap={roadmap} slug={slug} />;
+    return (
+      <Suspense fallback={<div className="fixed inset-0 flex items-center justify-center bg-white">Loading…</div>}>
+        <RoadmapView roadmap={roadmap} slug={slug} />
+      </Suspense>
+    );
   } catch {
     notFound();
   }

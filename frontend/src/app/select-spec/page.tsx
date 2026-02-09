@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { track } from '@/lib/analytics';
 
 const SPECIALIZATIONS = [
@@ -17,7 +17,23 @@ const SPECIALIZATIONS = [
   'Strategy',
 ] as const;
 
-export default function SelectSpecPage() {
+function SelectSpecFallback() {
+  return (
+    <main className="min-h-screen bg-zinc-50 p-4 sm:p-6 md:p-8">
+      <div className="mx-auto max-w-xl">
+        <div className="h-6 w-32 animate-pulse rounded bg-zinc-200" />
+        <div className="mt-4 h-8 w-64 animate-pulse rounded bg-zinc-200" />
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-14 animate-pulse rounded-xl bg-zinc-200" />
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function SelectSpecContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selected, setSelected] = useState<string[]>([]);
@@ -101,5 +117,13 @@ export default function SelectSpecPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function SelectSpecPage() {
+  return (
+    <Suspense fallback={<SelectSpecFallback />}>
+      <SelectSpecContent />
+    </Suspense>
   );
 }

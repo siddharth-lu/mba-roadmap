@@ -3,7 +3,7 @@
 import type { Phase } from './types';
 import { AVG_PACKAGE_LABEL } from './constants';
 
-type Props = { phases: Phase[] };
+type Props = { phases: readonly Phase[] };
 
 export function FullRoadmapTimeline({ phases }: Props) {
   return (
